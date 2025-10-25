@@ -474,29 +474,30 @@ export default function ProfilePage() {
             )}
 
             {/* Settings Tab */}
-            {activeTab === 'settings' && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                  Account Settings
-                </h2>
-                
-                <div className="border-2 border-red-200 rounded-lg p-6 bg-red-50">
-                  <h3 className="text-xl font-bold text-red-800 mb-2">
-                    Danger Zone
-                  </h3>
-                  <p className="text-gray-700 mb-4">
-                    Once you delete your account, there is no going back. All your videos,
-                    comments, and questions will be permanently deleted.
-                  </p>
-                  <button
-                    onClick={handleDeleteAccount}
-                    className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition font-medium"
-                  >
-                    Delete My Account
-                  </button>
-                </div>
-              </div>
-            )}
+{activeTab === 'settings' && (
+  <div>
+    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+      Account Settings
+    </h2>
+    
+    <div className="border-2 border-red-400 dark:border-red-200 rounded-lg p-6 bg-red-50 dark:bg-red-600">
+      <h3 className="text-xl font-bold text-red-400 dark:text-red-200 mb-2">
+        Danger Zone
+      </h3>
+      <p className="text-gray-700 dark:text-red-100 mb-4">
+        Once you delete your account, there is no going back. All your videos,
+        comments, and questions will be permanently deleted.
+      </p>
+      <button
+        onClick={handleDeleteAccount}
+        className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white px-6 py-3 rounded-lg transition font-medium"
+      >
+        Delete My Account
+      </button>
+    </div>
+  </div>
+)}
+
           </div>
         </div>
       </div>

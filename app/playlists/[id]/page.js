@@ -30,6 +30,9 @@ export default function PlaylistDetailPage() {
   const [allVideos, setAllVideos] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
+  const [creatorPlaylists, setCreatorPlaylists] = useState([]);
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -55,12 +58,9 @@ export default function PlaylistDetailPage() {
 
       const playlistData = { id: playlistDoc.id, ...playlistDoc.data() };
       
-      // Check ownership
-      if (playlistData.ownerUid !== user.uid) {
-        alert('You do not have access to this playlist');
-        router.push('/playlists');
-        return;
-      }
+      // Check if current user is owner
+      const userIsOwner = playlistData.ownerUid === user.uid;
+      setIsOwner(userIsOwner);
 
       setPlaylist(playlistData);
 
@@ -76,22 +76,34 @@ export default function PlaylistDetailPage() {
         setPlaylistVideos(videosData);
       }
 
-      // Fetch user's other videos (not in this playlist)
-      const userVideosQuery = query(
-        collection(db, 'videos'),
-        where('ownerUid', '==', user.uid)
-      );
-      const videosSnapshot = await getDocs(userVideosQuery);
-      const allVideosData = videosSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Filter out videos already in playlist
-      const availableVideos = allVideosData.filter(
-        video => !playlistData.videoIds?.includes(video.id)
-      );
-      setAllVideos(availableVideos);
+      // Only fetch user's other videos if they're the owner
+      if (userIsOwner) {
+        const userVideosQuery = query(
+          collection(db, 'videos'),
+          where('ownerUid', '==', user.uid)
+        );
+        const videosSnapshot = await getDocs(userVideosQuery);
+        const allVideosData = videosSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Filter out videos already in playlist
+        const availableVideos = allVideosData.filter(
+          video => !playlistData.videoIds?.includes(video.id)
+        );
+        setAllVideos(availableVideos);
+      }
+      // Fetch other playlists by the same creator
+const creatorPlaylistsQuery = query(
+  collection(db, 'playlists'),
+  where('ownerUid', '==', playlistData.ownerUid)
+);
+const creatorPlaylistsSnapshot = await getDocs(creatorPlaylistsQuery);
+const creatorPlaylistsData = creatorPlaylistsSnapshot.docs
+  .map(doc => ({ id: doc.id, ...doc.data() }))
+  .filter(p => p.id !== id); // Exclude current playlist
+setCreatorPlaylists(creatorPlaylistsData);
 
       setLoading(false);
     } catch (err) {
@@ -101,6 +113,11 @@ export default function PlaylistDetailPage() {
   };
 
   const handleRemoveVideo = async (videoId) => {
+    if (!isOwner) {
+      alert('You do not have permission to edit this playlist');
+      return;
+    }
+
     if (!confirm('Remove this video from playlist?')) return;
 
     try {
@@ -122,6 +139,11 @@ export default function PlaylistDetailPage() {
   };
 
   const handleAddVideo = async (videoId) => {
+    if (!isOwner) {
+      alert('You do not have permission to edit this playlist');
+      return;
+    }
+
     try {
       await updateDoc(doc(db, 'playlists', id), {
         videoIds: arrayUnion(videoId)
@@ -142,6 +164,11 @@ export default function PlaylistDetailPage() {
   };
 
   const handleDeletePlaylist = async () => {
+    if (!isOwner) {
+      alert('You do not have permission to delete this playlist');
+      return;
+    }
+
     if (!confirm('Delete this playlist? Videos will not be deleted.')) return;
 
     try {
@@ -185,10 +212,10 @@ export default function PlaylistDetailPage() {
           <div className="flex gap-3 items-center">
             <ThemeToggle />
             <Link
-              href="/playlists"
+              href="/browse"
               className="text-gray-600 hover:text-gray-800"
             >
-              ← Back to Playlists
+              ← Back to Browse
             </Link>
           </div>
         </div>
@@ -199,8 +226,20 @@ export default function PlaylistDetailPage() {
         {/* Playlist Header */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="flex justify-between items-start">
-            <div>
-              <div className="text-5xl mb-4">📋</div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-5xl">📋</div>
+                {!isOwner && (
+                  <span className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
+                    Public Playlist
+                  </span>
+                )}
+                {isOwner && (
+                  <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-medium">
+                    Your Playlist
+                  </span>
+                )}
+              </div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
                 {playlist.title}
               </h1>
@@ -209,23 +248,30 @@ export default function PlaylistDetailPage() {
               </p>
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <span>📹 {playlistVideos.length} videos</span>
-                <span>👤 {playlist.ownerName}</span>
+                <span>👤 Created by {playlist.ownerName}</span>
+                {playlist.createdAt && (
+                  <span>📅 {new Date(playlist.createdAt.seconds * 1000).toLocaleDateString()}</span>
+                )}
               </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-              >
-                + Add Videos
-              </button>
-              <button
-                onClick={handleDeletePlaylist}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium"
-              >
-                Delete Playlist
-              </button>
-            </div>
+            
+            {/* Owner Controls */}
+            {isOwner && (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  + Add Videos
+                </button>
+                <button
+                  onClick={handleDeletePlaylist}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium"
+                >
+                  Delete Playlist
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -242,14 +288,18 @@ export default function PlaylistDetailPage() {
                 No videos yet
               </h3>
               <p className="text-gray-600 mb-6">
-                Add videos to this playlist to get started
+                {isOwner 
+                  ? 'Add videos to this playlist to get started'
+                  : 'This playlist is empty. Check back later!'}
               </p>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
-              >
-                Add Videos
-              </button>
+              {isOwner && (
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  Add Videos
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -271,7 +321,7 @@ export default function PlaylistDetailPage() {
                         ▶️
                       </div>
                     )}
-                    <div className="absolute top-2 left-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                    <div className="absolute top-2 left-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded font-bold">
                       #{index + 1}
                     </div>
                     <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
@@ -283,20 +333,34 @@ export default function PlaylistDetailPage() {
                   <div className="p-4">
                     <Link
                       href={`/videos/${video.id}`}
-                      className="font-semibold text-gray-800 hover:text-blue-600 transition line-clamp-2 mb-2"
+                      className="font-semibold text-gray-800 hover:text-blue-600 transition line-clamp-2 mb-2 block"
                     >
                       {video.title}
                     </Link>
+                    <p className="text-sm text-gray-600 mb-2">
+                      by {video.ownerName}
+                    </p>
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
                       <span>👁️ {video.views || 0} views</span>
                       <span>📚 {video.subject}</span>
                     </div>
-                    <button
-                      onClick={() => handleRemoveVideo(video.id)}
-                      className="w-full text-red-600 hover:bg-red-50 py-2 rounded transition text-sm font-medium"
-                    >
-                      Remove from Playlist
-                    </button>
+                    
+                    {/* Owner-only controls */}
+                    {isOwner ? (
+                      <button
+                        onClick={() => handleRemoveVideo(video.id)}
+                        className="w-full text-red-600 hover:bg-red-50 py-2 rounded transition text-sm font-medium"
+                      >
+                        Remove from Playlist
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/videos/${video.id}`}
+                        className="block w-full text-center bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition text-sm font-medium"
+                      >
+                        Watch Video
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}
@@ -304,9 +368,38 @@ export default function PlaylistDetailPage() {
           )}
         </div>
       </div>
+              {/* More from Creator */}
+        {creatorPlaylists.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              More from {playlist.ownerName}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {creatorPlaylists.slice(0, 3).map((otherPlaylist) => (
+                <Link
+                  key={otherPlaylist.id}
+                  href={`/playlists/${otherPlaylist.id}`}
+                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
+                >
+                  <div className="text-4xl mb-4">📋</div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1">
+                    {otherPlaylist.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {otherPlaylist.description || 'No description'}
+                  </p>
+                  <div className="text-xs text-gray-500">
+                    📹 {otherPlaylist.videoIds?.length || 0} videos
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* Add Videos Modal */}
-      {showAddModal && (
+
+      {/* Add Videos Modal (Owner Only) */}
+      {isOwner && showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">

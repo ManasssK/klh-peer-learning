@@ -1,22 +1,54 @@
 // app/dashboard/page.js
+// 'use client';
+// import Link from 'next/link';
+
 'use client';
 import Link from 'next/link';
-
+import { useState, useEffect } from 'react'; // <-- Added useState
 import { useAuth } from '@/context/AuthContext';
+import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import ThemeToggle from '@/components/ThemeToggle';
+
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const [featuredPlaylists, setFeaturedPlaylists] = useState([]);
+
 
   useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
+  // Redirect to login if not authenticated
+  if (!loading && !user) {
+    router.push('/login');
+    return;
+  }
+
+  // Fetch featured playlists
+  if (user) {
+    fetchFeaturedPlaylists();
+  }
+}, [user, loading, router]);
+
+const fetchFeaturedPlaylists = async () => {
+  try {
+    const q = query(
+      collection(db, 'playlists'),
+      orderBy('createdAt', 'desc'),
+      limit(3)
+    );
+    const querySnapshot = await getDocs(q);
+    const playlistsData = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setFeaturedPlaylists(playlistsData);
+  } catch (err) {
+    console.error('Error fetching playlists:', err);
+  }
+};
+
 
   if (loading) {
     return (
@@ -129,6 +161,42 @@ export default function DashboardPage() {
     Organize your learning materials
   </p>
 </Link>
+{/* Featured Playlists */}
+{featuredPlaylists.length > 0 && (
+  <div className="mt-12 max-w-6xl mx-auto">
+    <div className="flex justify-between items-center mb-6 px-4 md:px-0">
+      <h2 className="text-2xl font-bold text-gray-800">
+        📋 Discover Playlists
+      </h2>
+      <Link
+        href="/browse"
+        className="text-blue-600 hover:underline text-sm font-medium"
+      >
+        View All →
+      </Link>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-0">
+      {featuredPlaylists.map((playlist) => (
+        <Link
+          key={playlist.id}
+          href={`/playlists/${playlist.id}`}
+          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition group"
+        >
+          <div className="text-4xl mb-4">📋</div>
+          <h3 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-blue-600 line-clamp-1">
+            {playlist.title}
+          </h3>
+          <p className="text-sm text-gray-600">
+            👤 {playlist.ownerName}
+          </p>
+        </Link>
+      ))}
+    </div>
+  </div>
+)}
+
+
+
 
 </div>
 

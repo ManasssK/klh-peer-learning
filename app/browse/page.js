@@ -198,24 +198,25 @@ setPlaylists(playlistsData);
   ) : (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {playlists.map((playlist) => (
-        <Link
-          key={playlist.id}
-          href={`/playlists/${playlist.id}`}
-          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
-        >
-          <div className="text-4xl mb-4">📋</div>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">
-            {playlist.title}
-          </h3>
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-            {playlist.description || 'No description'}
-          </p>
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <span>📹 {playlist.videoIds?.length || 0} videos</span>
-            <span>👤 {playlist.ownerName}</span>
-          </div>
-        </Link>
-      ))}
+  <Link
+    key={playlist.id}
+    href={`/playlists/${playlist.id}`}
+    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
+  >
+    <div className="text-4xl mb-4">📋</div>
+    <h3 className="text-xl font-bold text-gray-800 mb-2">
+      {playlist.title}
+    </h3>
+    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+      {playlist.description || 'No description'}
+    </p>
+    <div className="flex items-center justify-between text-sm text-gray-500">
+      <span>📹 {playlist.videoIds?.length || 0} videos</span>
+      <span>👤 {playlist.ownerName}</span>
+    </div>
+  </Link>
+))}
+
     </div>
   )
 ) : (
