@@ -6,6 +6,8 @@ import { AuthProvider } from '@/context/AuthContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 // import Chatbot from '@/components/Chatbot';
 import Chatbot from '@/components/Chatbot';
+import { ToastProvider } from '@/components/Toast';
+
 
 
 
@@ -32,12 +34,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body className={inter.className}>
   <ThemeProvider>
-    <AuthProvider>
-      {children}
-      <Chatbot />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <div className="animate-fade-in">
+          {children}
+        </div>
+        <Chatbot />
+      </AuthProvider>
+    </ToastProvider>
   </ThemeProvider>
 </body>
+
 
 
     </html>
