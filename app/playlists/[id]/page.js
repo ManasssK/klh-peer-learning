@@ -31,8 +31,6 @@ export default function PlaylistDetailPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
-  const [creatorPlaylists, setCreatorPlaylists] = useState([]);
-
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -49,7 +47,6 @@ export default function PlaylistDetailPage() {
     try {
       // Fetch playlist
       const playlistDoc = await getDoc(doc(db, 'playlists', id));
-      
       if (!playlistDoc.exists()) {
         alert('Playlist not found');
         router.push('/playlists');
@@ -57,11 +54,8 @@ export default function PlaylistDetailPage() {
       }
 
       const playlistData = { id: playlistDoc.id, ...playlistDoc.data() };
-      
-      // Check if current user is owner
       const userIsOwner = playlistData.ownerUid === user.uid;
       setIsOwner(userIsOwner);
-
       setPlaylist(playlistData);
 
       // Fetch videos in playlist
@@ -76,7 +70,7 @@ export default function PlaylistDetailPage() {
         setPlaylistVideos(videosData);
       }
 
-      // Only fetch user's other videos if they're the owner
+      // Fetch user's other videos if owner
       if (userIsOwner) {
         const userVideosQuery = query(
           collection(db, 'videos'),
@@ -87,23 +81,11 @@ export default function PlaylistDetailPage() {
           id: doc.id,
           ...doc.data()
         }));
-        
-        // Filter out videos already in playlist
         const availableVideos = allVideosData.filter(
           video => !playlistData.videoIds?.includes(video.id)
         );
         setAllVideos(availableVideos);
       }
-      // Fetch other playlists by the same creator
-const creatorPlaylistsQuery = query(
-  collection(db, 'playlists'),
-  where('ownerUid', '==', playlistData.ownerUid)
-);
-const creatorPlaylistsSnapshot = await getDocs(creatorPlaylistsQuery);
-const creatorPlaylistsData = creatorPlaylistsSnapshot.docs
-  .map(doc => ({ id: doc.id, ...doc.data() }))
-  .filter(p => p.id !== id); // Exclude current playlist
-setCreatorPlaylists(creatorPlaylistsData);
 
       setLoading(false);
     } catch (err) {
@@ -124,12 +106,7 @@ setCreatorPlaylists(creatorPlaylistsData);
       await updateDoc(doc(db, 'playlists', id), {
         videoIds: arrayRemove(videoId)
       });
-
-      // Update video document
-      await updateDoc(doc(db, 'videos', videoId), {
-        playlistId: null
-      });
-
+      await updateDoc(doc(db, 'videos', videoId), { playlistId: null });
       alert('Video removed from playlist');
       fetchPlaylistData();
     } catch (err) {
@@ -148,12 +125,7 @@ setCreatorPlaylists(creatorPlaylistsData);
       await updateDoc(doc(db, 'playlists', id), {
         videoIds: arrayUnion(videoId)
       });
-
-      // Update video document
-      await updateDoc(doc(db, 'videos', videoId), {
-        playlistId: id
-      });
-
+      await updateDoc(doc(db, 'videos', videoId), { playlistId: id });
       setShowAddModal(false);
       alert('Video added to playlist');
       fetchPlaylistData();
@@ -172,17 +144,13 @@ setCreatorPlaylists(creatorPlaylistsData);
     if (!confirm('Delete this playlist? Videos will not be deleted.')) return;
 
     try {
-      // Remove playlist reference from all videos
       if (playlist.videoIds && playlist.videoIds.length > 0) {
         const updates = playlist.videoIds.map(videoId =>
           updateDoc(doc(db, 'videos', videoId), { playlistId: null })
         );
         await Promise.all(updates);
       }
-
-      // Delete playlist
       await deleteDoc(doc(db, 'playlists', id));
-
       alert('Playlist deleted');
       router.push('/playlists');
     } catch (err) {
@@ -221,9 +189,8 @@ setCreatorPlaylists(creatorPlaylistsData);
         </div>
       </nav>
 
-      {/* Main Content */}
+      {/* Playlist Header */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Playlist Header */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="flex justify-between items-start">
             <div className="flex-1">
@@ -254,7 +221,7 @@ setCreatorPlaylists(creatorPlaylistsData);
                 )}
               </div>
             </div>
-            
+
             {/* Owner Controls */}
             {isOwner && (
               <div className="flex gap-3">
@@ -368,35 +335,6 @@ setCreatorPlaylists(creatorPlaylistsData);
           )}
         </div>
       </div>
-              {/* More from Creator */}
-        {creatorPlaylists.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              More from {playlist.ownerName}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {creatorPlaylists.slice(0, 3).map((otherPlaylist) => (
-                <Link
-                  key={otherPlaylist.id}
-                  href={`/playlists/${otherPlaylist.id}`}
-                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
-                >
-                  <div className="text-4xl mb-4">📋</div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1">
-                    {otherPlaylist.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {otherPlaylist.description || 'No description'}
-                  </p>
-                  <div className="text-xs text-gray-500">
-                    📹 {otherPlaylist.videoIds?.length || 0} videos
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
 
       {/* Add Videos Modal (Owner Only) */}
       {isOwner && showAddModal && (
@@ -409,8 +347,8 @@ setCreatorPlaylists(creatorPlaylistsData);
             {allVideos.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-600 mb-4">
-                  No available videos to add. All your videos are already in this playlist.
-                </p>
+                  No available videos to add. All your videos are already in this playlist
+                                  </p>
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
@@ -457,3 +395,4 @@ setCreatorPlaylists(creatorPlaylistsData);
     </div>
   );
 }
+
