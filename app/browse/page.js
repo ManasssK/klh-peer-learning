@@ -138,8 +138,8 @@ setPlaylists(playlistsData);
                 <option value="Electronics">Electronics</option>
                 <option value="Mechanical">Mechanical Engineering</option>
                 <option value="Civil">Civil Engineering</option> */}
-                <option value="Business">Electronics and Communication</option>
-                <option value="English">Artificial Intelligence</option>
+                <option value="Electronics and Communication">Electronics and Communication</option>
+                <option value="Artificial Intelligence and Data Science">Artificial Intelligence and Data Science</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -164,22 +164,25 @@ setPlaylists(playlistsData);
     className={`px-4 py-2 rounded-lg font-medium transition ${
       !showPlaylists
         ? 'bg-blue-600 text-white'
-        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
     }`}
   >
     📹 Videos
   </button>
+
   <button
     onClick={() => setShowPlaylists(true)}
     className={`px-4 py-2 rounded-lg font-medium transition ${
       showPlaylists
         ? 'bg-blue-600 text-white'
-        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        : 'bg-gray-200 text-gray-800 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
     }`}
   >
     📋 Playlists
   </button>
 </div>
+
+
 
 
        {/* Content Grid */}
