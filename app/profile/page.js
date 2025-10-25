@@ -16,6 +16,7 @@ import { db, auth } from '@/lib/firebase';
 import { deleteUser } from 'firebase/auth';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
+import { useCountUp } from '@/hooks/useScrollReveal';
 
 export default function ProfilePage() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -32,6 +33,10 @@ export default function ProfilePage() {
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+
+  // CountUp refs for stats
+  const { elementRef: videoRef, count: videoCount } = useCountUp(stats.totalVideos, 1500);
+  const { elementRef: viewRef, count: viewCount } = useCountUp(stats.totalViews, 1500);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -265,16 +270,16 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards with CountUp */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div ref={videoRef} className="bg-white rounded-lg shadow-md p-6">
             <div className="text-3xl mb-2">📹</div>
-            <div className="text-2xl font-bold text-gray-800">{stats.totalVideos}</div>
+            <div className="text-2xl font-bold text-gray-800">{videoCount}</div>
             <div className="text-sm text-gray-600">My Videos</div>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div ref={viewRef} className="bg-white rounded-lg shadow-md p-6">
             <div className="text-3xl mb-2">👁️</div>
-            <div className="text-2xl font-bold text-gray-800">{stats.totalViews}</div>
+            <div className="text-2xl font-bold text-gray-800">{viewCount}</div>
             <div className="text-sm text-gray-600">Total Views</div>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -474,29 +479,29 @@ export default function ProfilePage() {
             )}
 
             {/* Settings Tab */}
-{activeTab === 'settings' && (
-  <div>
-    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-      Account Settings
-    </h2>
-    
-    <div className="border-2 border-red-400 dark:border-red-200 rounded-lg p-6 bg-red-50 dark:bg-red-600">
-      <h3 className="text-xl font-bold text-red-400 dark:text-red-200 mb-2">
-        Danger Zone
-      </h3>
-      <p className="text-gray-700 dark:text-red-100 mb-4">
-        Once you delete your account, there is no going back. All your videos,
-        comments, and questions will be permanently deleted.
-      </p>
-      <button
-        onClick={handleDeleteAccount}
-        className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white px-6 py-3 rounded-lg transition font-medium"
-      >
-        Delete My Account
-      </button>
-    </div>
-  </div>
-)}
+            {activeTab === 'settings' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                  Account Settings
+                </h2>
+                
+                <div className="border-2 border-red-400 dark:border-red-200 rounded-lg p-6 bg-red-50 dark:bg-red-600">
+                  <h3 className="text-xl font-bold text-red-400 dark:text-red-200 mb-2">
+                    Danger Zone
+                  </h3>
+                  <p className="text-gray-700 dark:text-red-100 mb-4">
+                    Once you delete your account, there is no going back. All your videos,
+                    comments, and questions will be permanently deleted.
+                  </p>
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white px-6 py-3 rounded-lg transition font-medium"
+                  >
+                    Delete My Account
+                  </button>
+                </div>
+              </div>
+            )}
 
           </div>
         </div>

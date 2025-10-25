@@ -10,11 +10,15 @@ import { useAuth } from '@/context/AuthContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import AnimatedCard from '@/components/AnimatedCard';
 import { VideoCardSkeleton } from '@/components/LoadingSkeleton';
+import { useStaggerReveal } from '@/hooks/useScrollReveal';
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
   const [featuredPlaylists, setFeaturedPlaylists] = useState([]);
+
+  // Staggered reveal setup
+  const { setRef, visibleItems } = useStaggerReveal(3, { baseDelay: 150 });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -121,31 +125,52 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions with stagger reveal */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <AnimatedCard delay={100} hoverEffect="lift">
-            <Link href="/upload" className="block p-6">
-              <div className="text-4xl mb-4 animate-float">📹</div>
-              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Upload Video</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Share your knowledge with peers</p>
-            </Link>
-          </AnimatedCard>
+          <div
+            ref={setRef(0)}
+            className={`transition-all duration-500 ${
+              visibleItems.includes(0) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            <AnimatedCard hoverEffect="lift">
+              <Link href="/upload" className="block p-6">
+                <div className="text-4xl mb-4 animate-float">📹</div>
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Upload Video</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Share your knowledge with peers</p>
+              </Link>
+            </AnimatedCard>
+          </div>
 
-          <AnimatedCard delay={200} hoverEffect="lift">
-            <Link href="/browse" className="block p-6">
-              <div className="text-4xl mb-4 animate-float">📚</div>
-              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Browse Videos</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Explore educational content</p>
-            </Link>
-          </AnimatedCard>
+          <div
+            ref={setRef(1)}
+            className={`transition-all duration-500 ${
+              visibleItems.includes(1) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            <AnimatedCard hoverEffect="lift">
+              <Link href="/browse" className="block p-6">
+                <div className="text-4xl mb-4 animate-float">📚</div>
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Browse Videos</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Explore educational content</p>
+              </Link>
+            </AnimatedCard>
+          </div>
 
-          <AnimatedCard delay={300} hoverEffect="lift">
-            <Link href="/playlists" className="block p-6">
-              <div className="text-4xl mb-4 animate-float">📋</div>
-              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">My Playlists</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Organize your learning materials</p>
-            </Link>
-          </AnimatedCard>
+          <div
+            ref={setRef(2)}
+            className={`transition-all duration-500 ${
+              visibleItems.includes(2) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            <AnimatedCard hoverEffect="lift">
+              <Link href="/playlists" className="block p-6">
+                <div className="text-4xl mb-4 animate-float">📋</div>
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">My Playlists</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Organize your learning materials</p>
+              </Link>
+            </AnimatedCard>
+          </div>
         </div>
 
         {/* Featured Playlists */}
