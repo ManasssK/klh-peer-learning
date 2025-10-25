@@ -4,6 +4,10 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/context/AuthContext'
 import { ThemeProvider } from '@/context/ThemeContext'
+// import Chatbot from '@/components/Chatbot';
+import Chatbot from '@/components/Chatbot';
+
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,12 +31,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
-      </body>
+  <ThemeProvider>
+    <AuthProvider>
+      {children}
+      <Chatbot />
+    </AuthProvider>
+  </ThemeProvider>
+</body>
+
+
     </html>
   )
 }
