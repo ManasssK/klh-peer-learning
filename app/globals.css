@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
@@ -23,4 +26,192 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+/* Dark Mode Variables */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-color: #e5e7eb;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --button-primary: #2563eb;
+  --button-primary-hover: #1d4ed8;
+  --button-secondary: #f3f4f6;
+  --button-secondary-hover: #e5e7eb;
+  --shadow-sm: rgba(0, 0, 0, 0.05);
+  --shadow-md: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
+}
+
+.dark {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --border-color: #374151;
+  --card-bg: #1f2937;
+  --card-border: #374151;
+  --input-bg: #374151;
+  --input-border: #4b5563;
+  --button-primary: #3b82f6;
+  --button-primary-hover: #2563eb;
+  --button-secondary: #374151;
+  --button-secondary-hover: #4b5563;
+  --shadow-sm: rgba(0, 0, 0, 0.3);
+  --shadow-md: rgba(0, 0, 0, 0.5);
+  --shadow-lg: rgba(0, 0, 0, 0.7);
+}
+
+/* Apply dark mode styles */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Card styles */
+.card,
+.bg-white {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--card-border) !important;
+}
+
+/* Input styles */
+input,
+textarea,
+select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--input-border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+/* Text colors */
+.text-gray-800 {
+  color: var(--text-primary) !important;
+}
+
+.text-gray-700 {
+  color: var(--text-primary) !important;
+}
+
+.text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.text-gray-500 {
+  color: var(--text-tertiary) !important;
+}
+
+/* Background colors */
+.bg-gray-50 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.bg-gray-100 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Border colors */
+.border-gray-300 {
+  border-color: var(--border-color) !important;
+}
+
+.border-gray-200 {
+  border-color: var(--border-color) !important;
+}
+
+/* Shadow colors */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 var(--shadow-sm) !important;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px var(--shadow-md) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px var(--shadow-lg) !important;
+}
+
+/* Button hover states in dark mode */
+.dark .hover\:bg-gray-50:hover {
+  background-color: var(--button-secondary-hover) !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: var(--button-secondary-hover) !important;
+}
+
+.dark .hover\:bg-gray-200:hover {
+  background-color: var(--button-secondary-hover) !important;
+}
+
+/* Special elements that need specific dark mode treatment */
+.dark video {
+  border: 1px solid var(--border-color);
+}
+
+.dark nav {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Status badges - maintain their colors */
+.dark .bg-blue-100 {
+  background-color: #1e3a8a !important;
+  color: #93c5fd !important;
+}
+
+.dark .bg-green-100 {
+  background-color: #14532d !important;
+  color: #86efac !important;
+}
+
+.dark .bg-yellow-100 {
+  background-color: #713f12 !important;
+  color: #fde047 !important;
+}
+
+.dark .bg-red-100 {
+  background-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+
+.dark .bg-purple-100 {
+  background-color: #581c87 !important;
+  color: #d8b4fe !important;
+}
+
+/* Links in dark mode */
+.dark a {
+  color: #60a5fa;
+}
+
+.dark a:hover {
+  color: #93c5fd;
+}
+
+/* Code blocks in dark mode */
+.dark code {
+  background-color: var(--bg-tertiary);
+  color: #fbbf24;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
