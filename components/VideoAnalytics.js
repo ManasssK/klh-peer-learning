@@ -1,8 +1,7 @@
-// components/VideoAnalytics.js
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export default function VideoAnalytics({ videoId, ownerUid, currentUserUid }) {
@@ -16,15 +15,12 @@ export default function VideoAnalytics({ videoId, ownerUid, currentUserUid }) {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        // Get video views (already in video doc, but we'll fetch for completeness)
-        // Get comments count
         const commentsQuery = query(
           collection(db, 'comments'),
           where('videoId', '==', videoId)
         );
         const commentsSnapshot = await getDocs(commentsQuery);
 
-        // Get questions count
         const questionsQuery = query(
           collection(db, 'qa_threads'),
           where('videoId', '==', videoId)
@@ -43,9 +39,7 @@ export default function VideoAnalytics({ videoId, ownerUid, currentUserUid }) {
       }
     };
 
-    if (videoId) {
-      fetchAnalytics();
-    }
+    if (videoId) fetchAnalytics();
   }, [videoId]);
 
   // Only show to video owner or admin
@@ -55,30 +49,30 @@ export default function VideoAnalytics({ videoId, ownerUid, currentUserUid }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <p className="text-gray-600">Loading analytics...</p>
+      <div className="bg-black dark:bg-white rounded-lg shadow-md p-6">
+        <p className="text-white dark:text-black">Loading analytics...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="font-semibold text-gray-800 mb-4">Video Analytics</h3>
+    <div className="bg-black dark:bg-white rounded-lg shadow-md p-6">
+      <h3 className="font-semibold text-white dark:text-black mb-4">Video Analytics</h3>
       
       <div className="space-y-3">
-        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-          <span className="text-gray-700">💬 Comments</span>
-          <span className="font-bold text-gray-800">{analytics.comments}</span>
+        <div className="flex justify-between items-center p-3 rounded-lg bg-gray-900 dark:bg-gray-100">
+          <span className="text-white dark:text-black">💬 Comments</span>
+          <span className="font-bold text-white dark:text-black">{analytics.comments}</span>
         </div>
         
-        <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-          <span className="text-gray-700">❓ Questions</span>
-          <span className="font-bold text-gray-800">{analytics.questions}</span>
+        <div className="flex justify-between items-center p-3 rounded-lg bg-gray-900 dark:bg-gray-100">
+          <span className="text-white dark:text-black">❓ Questions</span>
+          <span className="font-bold text-white dark:text-black">{analytics.questions}</span>
         </div>
 
-        <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-          <span className="text-gray-700">📊 Engagement</span>
-          <span className="font-bold text-gray-800">
+        <div className="flex justify-between items-center p-3 rounded-lg bg-gray-900 dark:bg-gray-100">
+          <span className="text-white dark:text-black">📊 Engagement</span>
+          <span className="font-bold text-white dark:text-black">
             {analytics.comments + analytics.questions} interactions
           </span>
         </div>
