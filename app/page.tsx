@@ -4,18 +4,24 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 
 export default function HomePage() {
+  // ✅ Properly type the ref
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [showContent, setShowContent] = useState(false);
-  const videoRef = useRef(null);
 
   useEffect(() => {
     const video = videoRef.current;
+
     if (video) {
-      // When video finishes, show content
       const handleEnd = () => {
-        setTimeout(() => setShowContent(true), 500); // small delay for smooth fade
+        // Small delay for smoother transition
+        setTimeout(() => setShowContent(true), 500);
       };
+
+      // ✅ Type-safe event listeners
       video.addEventListener('ended', handleEnd);
-      return () => video.removeEventListener('ended', handleEnd);
+      return () => {
+        video.removeEventListener('ended', handleEnd);
+      };
     }
   }, []);
 
